@@ -35,8 +35,8 @@ def process( map, output_filename, index )
       neighbors.each do |neighbor|
         # if neighbor is higher then we "flow" to the current node
         if neighbor.a > node.a
-          if neighbor.edge.nil? or neighbor.edge.a >= node.a
-            puts "neighber #{neighbor.row},#{neighbor.row} -> #{i},#{j}"
+          if neighbor.edge.nil? or neighbor.edge.a > node.a
+            #puts "neighber #{neighbor.row},#{neighbor.row} -> #{i},#{j}"
             neighbor.edge = node
           end
         end
@@ -106,7 +106,6 @@ def read_file_and_process( filename )
   
   for i in ( 0 ... maps_count )
     
-    
     map = []
     rows_count, cols_count = (file.gets).split(' ').collect{ |n| n.to_i }
     for row in (0... rows_count )
@@ -114,8 +113,8 @@ def read_file_and_process( filename )
       (file.gets).split( ' ' ).each_with_index{ |n, index| map[ row ] << Node.new( row, index, n.to_i ) }
     end
 
-    process( map, output_filename, i ) if i == 3
-
+    process( map, output_filename, i )
+    
   end
 end
 
