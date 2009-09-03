@@ -1,3 +1,5 @@
+#require 'ruby-debug'
+
 class Node
   attr_accessor :row, :col, :a, :parent, :edge, :visited, :label
   def initialize( row, col, a )
@@ -29,11 +31,12 @@ def process( map, output_filename, index )
               j - 1 < 0 ? nil : map[ i ][ j - 1 ],                  # west
               j + 1 == map[0].length  ? nil : map[ i ][ j + 1 ],    # east 
               i + 1 == map.length     ? nil : map[ i + 1 ][ j ]     # south 
-            ].compact! || []
+            ].compact
       neighbors.each do |neighbor|
         # if neighbor is higher then we "flow" to the current node
         if neighbor.a > node.a
-          if neighbor.edge.nil? or ( neighbor.edge and neighbor.edge.a > node.a )
+          if neighbor.edge.nil? or neighbor.edge.a >= node.a
+            puts "neighber #{neighbor.row},#{neighbor.row} -> #{i},#{j}"
             neighbor.edge = node
           end
         end
@@ -41,9 +44,13 @@ def process( map, output_filename, index )
     end  
   end
   
+  for i in ( 0 ... map.length ) # row
+    for j in( 0 ... map[0].length )
+      puts "#{i},#{j} -> #{ map[i][j].edge ? map[i][j].edge : 'sink' }"
+    end
+  end
+  
   # traverse one more time to assign the label
-  
-  
   label = 'a'
   for i in ( 0 ... map.length ) # row
     for j in( 0 ... map[0].length )
@@ -98,6 +105,8 @@ def read_file_and_process( filename )
   File.delete output_filename if File.exist? output_filename
   
   for i in ( 0 ... maps_count )
+    
+    
     map = []
     rows_count, cols_count = (file.gets).split(' ').collect{ |n| n.to_i }
     for row in (0... rows_count )
@@ -105,7 +114,7 @@ def read_file_and_process( filename )
       (file.gets).split( ' ' ).each_with_index{ |n, index| map[ row ] << Node.new( row, index, n.to_i ) }
     end
 
-    process( map, output_filename, i )
+    process( map, output_filename, i ) if i == 3
 
   end
 end
