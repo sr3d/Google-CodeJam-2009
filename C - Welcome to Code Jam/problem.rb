@@ -1,4 +1,4 @@
-def process( s, output_filename, index )
+def process( s, output_filename, idx )
   output_file = File.open( output_filename, 'a+' )
 
 
@@ -10,21 +10,35 @@ def process( s, output_filename, index )
   
   puts s
   
-  groups = []
-  index = 0
-  phrase_index = 0
+  groups        = []
+  index         = 0
+  
+  # skip the first unmatched characters that happened to be in the mix
+
+  
   for i in ( 0 ... phrase.length )
+    while index < s.length and s[ index ] != phrase[ i ]
+      index = index + 1
+      puts "bumpding string index #{index}"
+      
+      #break if index > 30
+    end 
+    
     groups[ i ] = 0
-    while s[ index ] == phrase[ i ]
+    while s[ index ] == phrase[ i ] or ( s[ index ] == ' ' and phrase[ i ] != ' ' ) # allow spaces between characters
       groups[ i ] = groups[ i ] + 1
       index = index + 1
+      
+      puts "adding +1 to group"
     end
+    
   end
 
   count = 1
+  # The total count is just the combination of the groups
   groups.each{ |g| count = g * count }
   puts count 
-  output_file.puts "Case \##{index + 1}: #{count}"
+  output_file.puts "Case \##{idx + 1}: #{format_number( count )}"
 
   
   puts groups.inspect
@@ -35,6 +49,24 @@ def process( s, output_filename, index )
   output_file.close
   
 end
+
+def format_number( n )
+  case 
+  when n < 10:
+     "000#{n}"
+  when n >= 10 && n < 100:
+    "00#{n}"
+  when n >= 100 && n < 1000: 
+    "0#{n}"
+  when n >= 10000:
+    n = n.to_s; n[ n.length - 4, n.length ]
+  end
+end
+
+puts format_number( 1 )
+puts format_number( 10 )
+puts format_number( 256 )
+puts format_number( 0 )
 
 
 def read_file_and_process( filename )
@@ -48,6 +80,7 @@ def read_file_and_process( filename )
     process( file.gets, output_filename, i )
   end
 end
+
 
 
 input_file = 'input.in'
