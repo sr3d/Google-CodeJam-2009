@@ -11,64 +11,101 @@ def process( s, output_filename, idx )
   s.strip! 
   s.gsub!( regex, '' )
   
-  puts s
+  s = s[ s.index( phrase[0].chr ) .. s.rindex( phrase[ phrase.length - 1 ].chr ) ]
+  
+  puts "#{s} - #{s.length}"
   
   groups        = []
   
-  index         = 0
-  phrase_index = phrase.length - 1
+  
+  i = 0
+  
+  
+  
+  for i in 0 ... phrase.length
+    puts "i #{i}:  #{phrase[i].chr}"
+    groups[ i ] ||= 0
+    for j in 0 ... s.length  # for all occurence of the match character, we check the string
+      puts "j #{j}:  #{s[j].chr}"
 
-  index    = s.length - 1
-  
-  puts "index = #{index}"
-  puts "#{s[index].chr}"
-  
-  
-  while( index > 0 )
-    groups[ phrase_index ] ||= 0
-    puts "scanning phrase at #{phrase_index} found #{phrase[phrase_index].chr} "
-    puts "scanning string at index=#{index} found #{s[index].chr} "
+      p1 = phrase[ 0, i ] || ''
+      p2 = i + 1 <= phrase.length ? phrase[ i + 1, phrase.length ] : ''
 
-    #if phrase_index - 1 < 0
-    #  next_char = nil
-    #else
-    #  next_char = phrase[ phrase_index - 1 ]
-    #end
-    
-    while( s[ index ] == phrase[ phrase_index ] )
-      puts "matching #{s[index].chr} at index #{index} with #{phrase[ phrase_index ].chr } at phrase_index = #{phrase_index}"
-      groups[ phrase_index ] = groups[ phrase_index ] + 1
-      
-      # move to next character
-      if index >= 0 # s.length - phrase.length
-        index = index - 1
-        puts "move on to next index #{index}"
-      else
-        puts "index #{index} is smaller than #{s.length - phrase.length}.  Skipping"
-        #break
+      if s[ j ].chr == phrase[ i ].chr
+        puts "found match character at #{j}"
+        
+        s1 = s[ 0, j ] || ''
+        s2 = j + 1 <= s.length ? s[ j + 1, s.length ] : ''
+
+        
+        puts "s1:  #{s1}"
+        puts "s2:  #{s2}"
+        
+        valid1 = true
+        t1 = p1.split(//)
+        
+        k = s1.length
+        while( c = t1.pop )
+          if s1[ 0, k].rindex( c )
+            k = s1[ 0, k].rindex( c )
+          else
+            puts "not found sub-match for c [#{c}] in s1 [ #{s1} ]"
+            break
+          end
+        end
+        
+        if t1.length == 0 
+          valid1 = true
+        else
+          valid1 = false
+          puts "t1: #{t1}"
+        end
+        
+        #valid1 = t1.length == 0 
+        
+        
+        puts "valid1: #{valid1}"
+        
+        #k = p1.length - 1
+        
+        #while k > 0  
+        #  if s.rindex( p1[ k ].chr ) < s.rindex( p1[ k - 1].chr )
+        #  k = k - 1
+        #end
+          
+        #valid = true
+
+        ## for each letter in the previous patter, make sure it matches
+        #k = s.length
+        
+        # for each letters in the phrase after the current character,
+        # match with the 2nd half of the string
+        
+        #if valid 
+        #  groups[ i ] = groups[ i ] + 1
+        #end
       end
+  
     end
     
-    # move to next 
-    if phrase_index > 0
-      phrase_index = phrase_index - 1 
-    end
+    puts "*****************"
+
+    
   end
+  
   
   count = nil
   # The total count is just the combination of the groups
   groups.each{ |g| count ||= 1; count = g * count }
   puts count 
+  count ||= 0
   output_file.puts "Case \##{idx + 1}: #{format_number( count )}"
 
   
   puts groups.inspect
-  #phrase.split('').each_with_index do |l, i|
-  #  #puts "#{l} #{i}" 
-  #end
+  
   
   output_file.close
-  
 end
 
 def format_number( n )
