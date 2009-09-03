@@ -1,10 +1,92 @@
-#require 'ftools'
+class Node
+  attr_accessor :row, :col, :a, :parent, :edge, :visited, :label
+  def initialize( row, col, a )
+    @row, @col = row, col
+    @a        = a   # altitude
+    @visited  = false
+  end
+  
+  def is_sink
+    @edge.nil?
+  end
+  
+  def to_s
+    "(#{@row}, #{@col})[#{@a}]:  #{@label}"
+  end
 
-def process( map, output_filename )
-  output_file = File.open( output_filename, 'a+' )
-  output_file.write "test"
-  output_file.puts "test with new line"
 end
+
+
+def process( map, output_filename, index )
+  output_file = File.open( output_filename, 'a+' )
+  output_file.puts "Case \##{index + 1}:"
+
+  for i in ( 0 ... map.length ) # row
+    for j in( 0 ... map[0].length )
+      node = map[ i ][ j ]
+      neighbors = [ 
+              i - 1 < 0 ? nil : map[ i -1  ][ j ],                  # north
+              j - 1 < 0 ? nil : map[ i ][ j - 1 ],                  # west
+              j + 1 == map[0].length  ? nil : map[ i ][ j + 1 ],    # east 
+              i + 1 == map.length     ? nil : map[ i + 1 ][ j ]     # south 
+            ].compact! || []
+      neighbors.each do |neighbor|
+        # if neighbor is higher then we "flow" to the current node
+        if neighbor.a > node.a
+          if neighbor.edge.nil? or ( neighbor.edge and neighbor.edge.a > node.a )
+            neighbor.edge = node
+          end
+        end
+      end
+    end  
+  end
+  
+  # traverse one more time to assign the label
+  
+  
+  label = 'a'
+  for i in ( 0 ... map.length ) # row
+    for j in( 0 ... map[0].length )
+      node = map[i][j]
+      next if node.visited 
+      
+      temp = []
+      while node
+        node.visited = true
+        temp.push( node )
+        node = node.edge
+      end
+      
+      sink_label = ''
+      temp.reverse.each do |node|
+        if node.is_sink # sink
+          #puts "found sink #{node} with"
+          if !node.label
+            node.label = label.clone  # grrr ... caught me off guard here
+            label.succ!
+          end
+          
+          sink_label = node.label
+          
+        else # not sink, assigning the sink's label
+          node.label = sink_label
+        end
+        
+      end
+
+    end
+  end
+  
+  
+  # now output
+  for i in ( 0 ... map.length ) 
+    output_file.puts map[i].collect{ |node| node.label }.join( " " )
+  end
+
+  output_file.close
+  
+end
+
 
 def read_file_and_process( filename )
   file = File.open( filename, "r" )
@@ -19,12 +101,12 @@ def read_file_and_process( filename )
     map = []
     rows_count, cols_count = (file.gets).split(' ').collect{ |n| n.to_i }
     for row in (0... rows_count )
-      map[ row ] = (file.gets).split( ' ' ).collect{ |n| n.to_i }
+      map[ row ] = []
+      (file.gets).split( ' ' ).each_with_index{ |n, index| map[ row ] << Node.new( row, index, n.to_i ) }
     end
-    
-    puts map.inspect 
-    
-    process( map, output_filename )
+
+    process( map, output_filename, i )
+
   end
 end
 
