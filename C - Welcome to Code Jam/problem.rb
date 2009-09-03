@@ -6,33 +6,52 @@ def process( s, output_filename, idx )
            #0123456789123456789  -- length = 19
   # strip all the extra characters, preserving spaces
   regex = Regexp.new( "[^" + phrase.gsub( /\s/ , '').split('').uniq.push("\\s").join( "|" ) + "]" )
+  
+  puts "#{s}"
+  s.strip! 
   s.gsub!( regex, '' )
   
   puts s
   
   groups        = []
-  index         = 0
   
+  index         = 0
+  phrase_index = phrase.length - 1
 
-  main_index    = 0
-  while( main_index < s.length - phrase.length )
-    for i in ( 0 ... phrase.length )
-      # skip the first unmatched characters that happened to be in the mix
-      while index < s.length and s[ index ] != phrase[ i ]
-        index = index + 1
-        puts "bumpding string index #{index}"
-        
-        #break if index > 30
-      end 
+  index    = s.length - 1
+  
+  puts "index = #{index}"
+  puts "#{s[index].chr}"
+  
+  
+  while( index > 0 )
+    groups[ phrase_index ] ||= 0
+    puts "scanning phrase at #{phrase_index} found #{phrase[phrase_index].chr} "
+    puts "scanning string at index=#{index} found #{s[index].chr} "
+
+    #if phrase_index - 1 < 0
+    #  next_char = nil
+    #else
+    #  next_char = phrase[ phrase_index - 1 ]
+    #end
+    
+    while( s[ index ] == phrase[ phrase_index ] )
+      puts "matching #{s[index].chr} at index #{index} with #{phrase[ phrase_index ].chr } at phrase_index = #{phrase_index}"
+      groups[ phrase_index ] = groups[ phrase_index ] + 1
       
-      groups[ i ] = 0
-      while s[ index ] == phrase[ i ] or ( s[ index ] == ' ' and phrase[ i ] != ' ' ) # allow spaces between characters
-        groups[ i ] = groups[ i ] + 1
-        index = index + 1
-        
-        puts "adding +1 to group"
+      # move to next character
+      if index >= 0 # s.length - phrase.length
+        index = index - 1
+        puts "move on to next index #{index}"
+      else
+        puts "index #{index} is smaller than #{s.length - phrase.length}.  Skipping"
+        #break
       end
-      
+    end
+    
+    # move to next 
+    if phrase_index > 0
+      phrase_index = phrase_index - 1 
     end
   end
   
@@ -53,6 +72,7 @@ def process( s, output_filename, idx )
 end
 
 def format_number( n )
+  return 0 if n.nil?
   case 
   when n < 10:
      "000#{n}"
