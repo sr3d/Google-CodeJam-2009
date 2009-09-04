@@ -41,11 +41,13 @@ def process( s, output_filename, idx )
         puts "s1:  #{s1}"
         puts "s2:  #{s2}"
         
-        valid1 = true
+        valid1 = false
+        
         t1 = p1.split(//)
         
         k = s1.length
         while( c = t1.pop )
+          puts "trying to match c [ #{c} ]"
           if s1[ 0, k].rindex( c )
             k = s1[ 0, k].rindex( c )
           else
@@ -58,32 +60,42 @@ def process( s, output_filename, idx )
           valid1 = true
         else
           valid1 = false
-          puts "t1: #{t1}"
+          #puts "t1: #{t1}"
+        end
+
+        puts "valid1: #{valid1}\n\----"
+        
+        # match 2nd half
+        valid2 = false
+        t2 = p2.reverse.split(//)
+        
+        k = 0
+        while( c = t2.pop )
+          puts "trying to match c [ #{c} ]"
+          if s2[ k, s2.length ].index( c )
+            k = s2[ k, s2.length ].index( c )
+          else
+            puts "not found sub-match for c [#{c}] in s2 [ #{s2} ]"
+            break
+          end
         end
         
-        #valid1 = t1.length == 0 
+        if t2.length == 0 
+          valid2 = true
+        else
+          valid2 = false
+          #puts "t1: #{t1}"
+        end        
         
+        puts "valid2: #{valid2}"
         
-        puts "valid1: #{valid1}"
+        if valid1 and valid2
+          groups[ i ] = groups[ i ] + 1
+        end
+      
         
-        #k = p1.length - 1
-        
-        #while k > 0  
-        #  if s.rindex( p1[ k ].chr ) < s.rindex( p1[ k - 1].chr )
-        #  k = k - 1
-        #end
-          
-        #valid = true
-
-        ## for each letter in the previous patter, make sure it matches
-        #k = s.length
-        
-        # for each letters in the phrase after the current character,
-        # match with the 2nd half of the string
-        
-        #if valid 
-        #  groups[ i ] = groups[ i ] + 1
-        #end
+        puts "*****"
+        puts "valid1: #{valid1} and valid2: #{valid2}"
       end
   
     end
@@ -120,6 +132,11 @@ def format_number( n )
   when n >= 10000:
     n = n.to_s; n[ n.length - 4, n.length ]
   end
+end
+
+def match_left_half( p1, s1 )
+  
+  
 end
 
 
